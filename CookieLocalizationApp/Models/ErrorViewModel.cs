@@ -1,5 +1,3 @@
-using System;
-
 namespace CookieLocalizationApp.Models
 {
     public class ErrorViewModel

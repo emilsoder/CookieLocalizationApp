@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CookieLocalizationApp.Localization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,40 +8,42 @@ namespace CookieLocalizationApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services
+                // Adds JSON localization
+                .AddJsonLocalization(options => options.ResourcesPath = "Resources")
+                // Add MVC as usual
+                .AddMvc()
+                //Add localization provider for Views
+                .AddViewLocalization();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            #region Default configuration
+
             if (env.IsDevelopment())
             {
                 app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
+            else app.UseExceptionHandler("/Home/Error");
 
             app.UseStaticFiles();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
+            #endregion
+
+            // Call the extension method (that extends IApplicationBuilder) to provide cookie localization. //
+            app.UseCookieLocalization();
+            // *******
+
+            // Use MVC with default route '/Home/Index'
+            app.UseMvcWithDefaultRoute();
         }
     }
 }
